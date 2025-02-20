@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <title>Таймер - 12 клас</title>
+  <style>
+    body { 
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f8f9fa;
+    }
+    .container {
+      text-align: center;
+      margin-bottom: 10vh;
+    }
+    h1 {
+      color: #2e7d32;
+      margin-bottom: 30px;
+      font-size: 2.2em;
+    }
+    .info-section {
+      margin-bottom: 60px;
+    }
+    .timer { 
+      font-size: 2.4em;
+      background-color: #e8f5e9;
+      padding: 25px 50px;
+      border-radius: 15px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      margin: 20px 0;
+      white-space: nowrap;
+    }
+    .timer span {
+      color: #2e7d32;
+      font-weight: bold;
+      margin: 0 5px;
+    }
+    .current-time {
+      font-size: 1.3em;
+      color: #2e7d32;
+      background: #e8f5e9;
+      padding: 10px 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+    }
+    .target-time {
+      font-size: 1.2em;
+      color: #1b5e20;
+      margin: 15px 0;
+    }
+    @keyframes celebrate {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+    @keyframes confetti {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+    .confetti {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      background-color: #4CAF50;
+      position: absolute;
+      top: -10px;
+      animation: confetti 4s ease-out forwards;
+    }
+    .celebration-text {
+      font-size: 2em;
+      color: #2e7d32;
+      margin: 20px 0;
+      animation: celebrate 1s ease-in-out infinite;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>12 клас</h1>
+    
+    <div class="info-section">
+      <div class="current-time">
+        Текущо време: <span id="currentTime">00:00:00</span>
+      </div>
+
+      <div class="target-time">
+        Крайна дата: 15.05.2025 12:00:00
+      </div>
+    </div>
+
+    <div class="timer" id="timerDisplay">
+      <span id="weeks">00</span> седмици
+      <span id="days">00</span> дни
+      <span id="hours">00</span> часа
+      <span id="minutes">00</span> минути
+      <span id="seconds">00</span> секунди
+    </div>
+
+    <div id="celebrationText" class="celebration-text">
+      🎉 На добър час! 🎉
+    </div>
+  </div>
+
+  <script>
+    const TARGET_DATE = new Date('2025-05-15T00:00:00').getTime();
+    let timerInterval;
+    
+    function padNumber(num) {
+      return num.toString().padStart(2, '0');
+    }
+
+    function formatDateTime(date) {
+      const day = padNumber(date.getDate());
+      const month = padNumber(date.getMonth() + 1);
+      const year = date.getFullYear();
+      const hours = padNumber(date.getHours());
+      const minutes = padNumber(date.getMinutes());
+      const seconds = padNumber(date.getSeconds());
+      return `${day}.${month}.${year} ${hours}:${minutes}:${seconds}`;
+    }
+
+    function createConfetti() {
+      const colors = ['#4CAF50', '#81C784', '#66BB6A', '#43A047', '#2E7D32'];
+      for(let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * window.innerWidth + 'px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 5000);
+      }
+    }
+
+    function updateCurrentTime() {
+      const now = new Date();
+      document.getElementById('currentTime').textContent = formatDateTime(now);
+    }
+
+    setInterval(updateCurrentTime, 1000);
+    updateCurrentTime();
+
+    function updateTimer() {
+      const now = new Date().getTime();
+      let diff = TARGET_DATE - now;
+
+      if (diff < 0) {
+        clearInterval(timerInterval);
+        document.getElementById('celebrationText').style.display = 'block';
+        createConfetti();
+        return;
+      }
+
+      const secondsInMs = 1000;
+      const minutesInMs = secondsInMs * 60;
+      const hoursInMs = minutesInMs * 60;
+      const daysInMs = hoursInMs * 24;
+      const weeksInMs = daysInMs * 7;
+
+      const weeks = Math.floor(diff / weeksInMs);
+      diff %= weeksInMs;
+      const days = Math.floor(diff / daysInMs);
+      diff %= daysInMs;
+      const hours = Math.floor(diff / hoursInMs);
+      diff %= hoursInMs;
+      const minutes = Math.floor(diff / minutesInMs);
+      diff %= minutesInMs;
+      const seconds = Math.floor(diff / secondsInMs);
+
+      document.getElementById('weeks').textContent = padNumber(weeks);
+      document.getElementById('days').textContent = padNumber(days);
+      document.getElementById('hours').textContent = padNumber(hours);
+      document.getElementById('minutes').textContent = padNumber(minutes);
+      document.getElementById('seconds').textContent = padNumber(seconds);
+    }
+
+    timerInterval = setInterval(updateTimer, 1000);
+    updateTimer();
+  </script>
+</body>
+</html>

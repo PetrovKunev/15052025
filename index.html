@@ -2,7 +2,7 @@
 <html lang="bg">
 <head>
   <meta charset="utf-8">
-  <title>Таймер - 12 клас</title>
+  <title>Таймери - 2025</title>
   <link rel="shortcut icon" href="timer_1225.ico" type="image/x-icon">
   <style>
     body { 
@@ -25,21 +25,34 @@
       font-size: 2.2em;
     }
     .info-section {
-      margin-bottom: 60px;
+      margin-bottom: 30px;
+    }
+    .timer-container {
+      margin-bottom: 40px;
     }
     .timer { 
       font-size: 2.4em;
-      background-color: #e8f5e9;
       padding: 25px 50px;
       border-radius: 15px;
       box-shadow: 0 4px 6px rgba(0,0,0,0.1);
       margin: 20px 0;
       white-space: nowrap;
     }
+    .timer-1 {
+      background-color: #e8f5e9;
+    }
+    .timer-2 {
+      background-color: #c8e6c9;
+    }
     .timer span {
-      color: #2e7d32;
       font-weight: bold;
       margin: 0 5px;
+    }
+    .timer-1 span {
+      color: #2e7d32;
+    }
+    .timer-2 span {
+      color: #1b5e20;
     }
     .current-time {
       font-size: 1.3em;
@@ -51,8 +64,13 @@
     }
     .target-time {
       font-size: 1.2em;
-      color: #1b5e20;
       margin: 15px 0;
+    }
+    .target-time-1 {
+      color: #1b5e20;
+    }
+    .target-time-2 {
+      color: #2e7d32;
     }
     @keyframes celebrate {
       0% { transform: scale(1); }
@@ -74,42 +92,65 @@
     }
     .celebration-text {
       font-size: 2em;
-      color: #2e7d32;
       margin: 20px 0;
       animation: celebrate 1s ease-in-out infinite;
       display: none;
+    }
+    .celebration-text-1 {
+      color: #2e7d32;
+    }
+    .celebration-text-2 {
+      color: #1b5e20;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>12 клас</h1>
+    <h1>Таймери</h1>
     
     <div class="info-section">
       <div class="current-time">
         Текущо време: <span id="currentTime">00:00:00</span>
       </div>
+    </div>
 
-      <div class="target-time">
-        Крайна дата: 15.05.2025 12:00:00
+    <div class="timer-container">
+      <div class="target-time target-time-1">
+        Дипломиране: 15.05.2025 12:00:00
+      </div>
+      <div class="timer timer-1" id="timerDisplay1">
+        <span id="weeks1">00</span> седмици
+        <span id="days1">00</span> дни
+        <span id="hours1">00</span> часа
+        <span id="minutes1">00</span> минути
+        <span id="seconds1">00</span> секунди
       </div>
     </div>
 
-    <div class="timer" id="timerDisplay">
-      <span id="weeks">00</span> седмици
-      <span id="days">00</span> дни
-      <span id="hours">00</span> часа
-      <span id="minutes">00</span> минути
-      <span id="seconds">00</span> секунди
+    <div class="timer-container">
+      <div class="target-time target-time-2">
+        Край на учебната година: 30.06.2025 14:20:00
+      </div>
+      <div class="timer timer-2" id="timerDisplay2">
+        <span id="weeks2">00</span> седмици
+        <span id="days2">00</span> дни
+        <span id="hours2">00</span> часа
+        <span id="minutes2">00</span> минути
+        <span id="seconds2">00</span> секунди
+      </div>
     </div>
 
-    <div id="celebrationText" class="celebration-text">
+    <div id="celebrationText1" class="celebration-text celebration-text-1">
       🎉 На добър час! 🎉
+    </div>
+    <div id="celebrationText2" class="celebration-text celebration-text-2">
+      🌟 Ново начало! 🌟
     </div>
   </div>
 
   <script>
-    const TARGET_DATE = new Date('2025-05-15T00:00:00').getTime();
+    const TARGET_DATE_1 = new Date('2025-05-15T12:00:00').getTime();
+    const TARGET_DATE_2 = new Date('2025-06-30T14:20:00').getTime();
     let timerInterval;
     
     function padNumber(num) {
@@ -147,17 +188,7 @@
     setInterval(updateCurrentTime, 1000);
     updateCurrentTime();
 
-    function updateTimer() {
-      const now = new Date().getTime();
-      let diff = TARGET_DATE - now;
-
-      if (diff < 0) {
-        clearInterval(timerInterval);
-        document.getElementById('celebrationText').style.display = 'block';
-        createConfetti();
-        return;
-      }
-
+    function calculateTimeUnits(diff) {
       const secondsInMs = 1000;
       const minutesInMs = secondsInMs * 60;
       const hoursInMs = minutesInMs * 60;
@@ -174,15 +205,60 @@
       diff %= minutesInMs;
       const seconds = Math.floor(diff / secondsInMs);
 
-      document.getElementById('weeks').textContent = padNumber(weeks);
-      document.getElementById('days').textContent = padNumber(days);
-      document.getElementById('hours').textContent = padNumber(hours);
-      document.getElementById('minutes').textContent = padNumber(minutes);
-      document.getElementById('seconds').textContent = padNumber(seconds);
+      return { weeks, days, hours, minutes, seconds };
     }
 
-    timerInterval = setInterval(updateTimer, 1000);
-    updateTimer();
+    function updateTimerDisplay(timerId, timeUnits) {
+      document.getElementById(`weeks${timerId}`).textContent = padNumber(timeUnits.weeks);
+      document.getElementById(`days${timerId}`).textContent = padNumber(timeUnits.days);
+      document.getElementById(`hours${timerId}`).textContent = padNumber(timeUnits.hours);
+      document.getElementById(`minutes${timerId}`).textContent = padNumber(timeUnits.minutes);
+      document.getElementById(`seconds${timerId}`).textContent = padNumber(timeUnits.seconds);
+    }
+
+    function createConfettiWithColors(colors) {
+      for(let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * window.innerWidth + 'px';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 5000);
+      }
+    }
+
+    function updateTimers() {
+      const now = new Date().getTime();
+      let diff1 = TARGET_DATE_1 - now;
+      let diff2 = TARGET_DATE_2 - now;
+      
+      // Първи таймер
+      if (diff1 > 0) {
+        const timeUnits1 = calculateTimeUnits(diff1);
+        updateTimerDisplay('1', timeUnits1);
+      } else if (diff1 <= 0 && document.getElementById('celebrationText1').style.display !== 'block') {
+        document.getElementById('celebrationText1').style.display = 'block';
+        createConfettiWithColors(['#4CAF50', '#81C784', '#66BB6A', '#43A047', '#2E7D32']);
+      }
+
+      // Втори таймер
+      if (diff2 > 0) {
+        const timeUnits2 = calculateTimeUnits(diff2);
+        updateTimerDisplay('2', timeUnits2);
+      } else if (diff2 <= 0 && document.getElementById('celebrationText2').style.display !== 'block') {
+        document.getElementById('celebrationText2').style.display = 'block';
+        createConfettiWithColors(['#66BB6A', '#43A047', '#2E7D32', '#1B5E20', '#004D40']);
+      }
+
+      // Спиране на таймера само ако и двата са приключили
+      if (diff1 <= 0 && diff2 <= 0) {
+        clearInterval(timerInterval);
+      }
+    }
+
+    timerInterval = setInterval(updateTimers, 1000);
+    updateTimers();
   </script>
 </body>
 </html>

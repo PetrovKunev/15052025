@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <title>Кратък таймер</title>
+  <link rel="shortcut icon" href="timer_1225.ico" type="image/x-icon">
+  <style>
+    body { 
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f8f9fa;
+    }
+    .container {
+      text-align: center;
+      margin-bottom: 5vh;
+      max-width: 600px;
+      width: 90%;
+    }
+    h1 {
+      color: #2e7d32;
+      margin-bottom: 30px;
+      font-size: 2.2em;
+    }
+    .tab-container {
+      display: flex;
+      gap: 20px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+    .tab {
+      padding: 10px 20px;
+      background-color: #e8f5e9;
+      border: 2px solid #2e7d32;
+      border-radius: 8px;
+      color: #2e7d32;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .tab.active {
+      background-color: #2e7d32;
+      color: white;
+    }
+    .timer-input {
+      display: none;
+    }
+    .timer-input.active {
+      display: block;
+    }
+    .input-group {
+      margin: 20px 0;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      align-items: center;
+    }
+    input {
+      padding: 8px;
+      width: 80px;
+      border: 1px solid #2e7d32;
+      border-radius: 4px;
+      text-align: center;
+      font-size: 1.1em;
+    }
+    button {
+      padding: 10px 20px;
+      background-color: #2e7d32;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1.1em;
+      margin: 0 10px;
+    }
+    button:hover {
+      background-color: #1b5e20;
+    }
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    .current-time {
+      font-size: 1.3em;
+      color: #2e7d32;
+      background: #e8f5e9;
+      padding: 10px 20px;
+      border-radius: 10px;
+      margin: 15px 0;
+    }
+    @keyframes timerPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    .timer-display {
+      font-size: 3.5em;
+      font-weight: bold;
+      color: #2e7d32;
+      background-color: #e8f5e9;
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px 0;
+      font-family: monospace;
+      transition: all 0.5s ease;
+    }
+    .timer-display.expired {
+      color: #d32f2f;
+      background-color: #fbe9e7;
+      animation: timerPulse 1.5s ease-in-out infinite;
+    }
+    .nav-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background-color: #2e7d32;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .nav-button:hover {
+      background-color: #1b5e20;
+    }
+    .quick-presets {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+    .preset-btn {
+      padding: 8px 15px;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      border: 1px solid #2e7d32;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .preset-btn:hover {
+      background-color: #2e7d32;
+      color: white;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a href="index.html" class="nav-button">Към дългия таймер</a>
+    
+    <h1>Кратък таймер</h1>
+    
+    <div class="current-time">
+      Текущо време: <span id="currentTime">00:00:00</span>
+    </div>
+
+    <div class="tab-container">
+      <div class="tab active" onclick="switchTab('target')">До определен час</div>
+      <div class="tab" onclick="switchTab('duration')">Ръчно задаване</div>
+    </div>
+
+    <div id="targetTimeInput" class="timer-input active">
+      <div class="input-group">
+        <!-- Добавяме data-force-24h атрибут и премахваме формат чрез CSS -->
+        <input type="time" id="targetTime" value="12:00" data-force-24h="true" style="appearance: textfield; -webkit-appearance: textfield;">
+        <button onclick="startTargetTimer()">Старт</button>
+      </div>
+    </div>
+
+    <div id="durationInput" class="timer-input">
+      <div class="input-group">
+        <input type="number" id="hours" placeholder="Часове" min="0" max="23" value="0">
+        <input type="number" id="minutes" placeholder="Минути" min="0" max="59" value="0">
+        <input type="number" id="seconds" placeholder="Секунди" min="0" max="59" value="0">
+        <button onclick="startCustomTimer()">Старт</button>
+      </div>
+      <div class="quick-presets">
+        <button class="preset-btn" onclick="setPreset(0, 1, 0)">1 минута</button>
+        <button class="preset-btn" onclick="setPreset(0, 5, 0)">5 минути</button>
+        <button class="preset-btn" onclick="setPreset(0, 15, 0)">15 минути</button>
+        <button class="preset-btn" onclick="setPreset(1, 0, 0)">1 час</button>
+      </div>
+    </div>
+
+    <div class="timer-display" id="timerDisplay">
+      00:00:00
+    </div>
+
+    <div>
+      <button id="pauseButton" onclick="togglePause()" disabled>Пауза</button>
+      <button onclick="resetTimer()">Нулиране</button>
+    </div>
+  </div>
+
+  <script>
+    let countdown;
+    let remainingTime = 0;
+    let isPaused = false;
+
+    // Функция за форматиране на времето във формат 24 часа
+    function formatTimeAs24Hour(date) {
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      const seconds = String(date.getSeconds()).padStart(2, '0');
+      return `${hours}:${minutes}:${seconds}`;
+    }
+
+    // Обновяване на текущото време
+    function updateCurrentTime() {
+      const now = new Date();
+      document.getElementById('currentTime').textContent = formatTimeAs24Hour(now);
+    }
+
+    // Превключване между табовете
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.timer-input').forEach(t => t.classList.remove('active'));
+      
+      if (tab === 'target') {
+        document.querySelector('.tab:first-child').classList.add('active');
+        document.getElementById('targetTimeInput').classList.add('active');
+      } else {
+        document.querySelector('.tab:last-child').classList.add('active');
+        document.getElementById('durationInput').classList.add('active');
+      }
+    }
+
+    // Задаване на предварително зададени стойности
+    function setPreset(hours, minutes, seconds) {
+      document.getElementById('hours').value = hours;
+      document.getElementById('minutes').value = minutes;
+      document.getElementById('seconds').value = seconds;
+    }
+
+    // Старт на таймера до определен час
+    function startTargetTimer() {
+      const targetTime = document.getElementById('targetTime').value;
+      if (!targetTime) return;
+      
+      const [hours, minutes] = targetTime.split(':');
+      const target = new Date();
+      target.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+      
+      if (target <= new Date()) {
+        target.setDate(target.getDate() + 1);
+      }
+
+      startTimer((target - new Date()) / 1000);
+    }
+
+    // Старт на таймера с ръчно зададено време
+    function startCustomTimer() {
+      const hours = parseInt(document.getElementById('hours').value) || 0;
+      const minutes = parseInt(document.getElementById('minutes').value) || 0;
+      const seconds = parseInt(document.getElementById('seconds').value) || 0;
+      
+      if (hours === 0 && minutes === 0 && seconds === 0) return;
+      
+      startTimer(hours * 3600 + minutes * 60 + seconds);
+    }
+
+    // Обща функция за стартиране на таймера
+    function startTimer(duration) {
+      clearInterval(countdown);
+      remainingTime = duration;
+      isPaused = false;
+      document.getElementById('pauseButton').disabled = false;
+      document.getElementById('pauseButton').textContent = 'Пауза';
+      
+      // Премахване на класа "expired" при стартиране на нов таймер
+      document.getElementById('timerDisplay').classList.remove('expired');
+      
+      updateDisplay();
+      countdown = setInterval(() => {
+        if (!isPaused) {
+          remainingTime--;
+          if (remainingTime <= 0) {
+            clearInterval(countdown);
+            document.getElementById('pauseButton').disabled = true;
+            // Добавяне на класа "expired" когато таймерът достигне 0
+            document.getElementById('timerDisplay').classList.add('expired');
+          }
+          updateDisplay();
+        }
+      }, 1000);
+    }
+
+    // Пауза/продължаване на таймера
+    function togglePause() {
+      isPaused = !isPaused;
+      document.getElementById('pauseButton').textContent = isPaused ? 'Продължи' : 'Пауза';
+    }
+
+    // Нулиране на таймера
+    function resetTimer() {
+      clearInterval(countdown);
+      remainingTime = 0;
+      isPaused = false;
+      document.getElementById('pauseButton').disabled = true;
+      document.getElementById('pauseButton').textContent = 'Пауза';
+      
+      // Изрично премахване на класа expired при нулиране
+      const timerDisplay = document.getElementById('timerDisplay');
+      timerDisplay.classList.remove('expired');
+      
+      updateDisplay();
+    }
+
+    // Обновяване на дисплея с оставащото време
+    function updateDisplay() {
+      const hours = Math.floor(remainingTime / 3600);
+      const minutes = Math.floor((remainingTime % 3600) / 60);
+      const seconds = Math.floor(remainingTime % 60);
+      
+      document.getElementById('timerDisplay').textContent = 
+        `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    // Инициализация
+    setInterval(updateCurrentTime, 1000);
+    updateCurrentTime();
+  </script>
+  
+  <!-- Добавяме функцията за корекция на формата на времето -->
+  <script>
+    // Функция която коригира начина на показване на time input полето
+    function fixTimeInputFormat() {
+      // Създаваме custom time picker за да заменим стандартния
+      const targetTimeInput = document.getElementById('targetTime');
+      
+      if (targetTimeInput) {
+        // Създаваме обвиващ контейнер за да заменим стандартния input
+        const wrapper = document.createElement('div');
+        wrapper.className = 'custom-time-input';
+        wrapper.style.display = 'inline-flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.border = '1px solid #2e7d32';
+        wrapper.style.borderRadius = '4px';
+        wrapper.style.overflow = 'hidden';
+        
+        // Създаваме input за часове
+        const hoursInput = document.createElement('input');
+        hoursInput.type = 'number';
+        hoursInput.min = 0;
+        hoursInput.max = 23;
+        hoursInput.value = targetTimeInput.value.split(':')[0] || '12';
+        hoursInput.style.width = '40px';
+        hoursInput.style.border = 'none';
+        hoursInput.style.textAlign = 'center';
+        hoursInput.style.padding = '8px 0';
+        hoursInput.id = 'customHours';
+        
+        // Създаваме разделител
+        const separator = document.createElement('span');
+        separator.textContent = ':';
+        separator.style.fontWeight = 'bold';
+        
+        // Създаваме input за минути
+        const minutesInput = document.createElement('input');
+        minutesInput.type = 'number';
+        minutesInput.min = 0;
+        minutesInput.max = 59;
+        minutesInput.value = targetTimeInput.value.split(':')[1] || '00';
+        minutesInput.style.width = '40px';
+        minutesInput.style.border = 'none';
+        minutesInput.style.textAlign = 'center';
+        minutesInput.style.padding = '8px 0';
+        minutesInput.id = 'customMinutes';
+        
+        // Добавяме елементите към wrapper-а
+        wrapper.appendChild(hoursInput);
+        wrapper.appendChild(separator);
+        wrapper.appendChild(minutesInput);
+        
+        // Заменяме оригиналния input с нашия custom-time
+        targetTimeInput.parentNode.insertBefore(wrapper, targetTimeInput);
+        targetTimeInput.style.display = 'none';
+        
+        // Актуализираме стойността на оригиналния input когато се променят custom полетата
+        const updateOriginalInput = () => {
+          const hours = String(hoursInput.value).padStart(2, '0');
+          const minutes = String(minutesInput.value).padStart(2, '0');
+          targetTimeInput.value = `${hours}:${minutes}`;
+        };
+        
+        hoursInput.addEventListener('input', updateOriginalInput);
+        minutesInput.addEventListener('input', updateOriginalInput);
+        
+        // Коригираме функцията startTargetTimer() да използва custom полетата
+        window.originalStartTargetTimer = window.startTargetTimer;
+        window.startTargetTimer = function() {
+          updateOriginalInput(); // Актуализираме оригиналния input преди да стартираме таймера
+          window.originalStartTargetTimer();
+        };
+      }
+    }
+
+    // Изпълняваме функцията след зареждане на страницата
+    document.addEventListener('DOMContentLoaded', fixTimeInputFormat);
+  </script>
+</body>
+</html>
